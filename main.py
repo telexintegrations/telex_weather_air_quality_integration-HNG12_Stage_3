@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import List
+import os
+import requests
 
 app = FastAPI()
 
@@ -75,9 +77,18 @@ def get_integration_json(request: Request):
 def handle_weather_request(payload: MonitorPayload):
     location = payload.settings[0].default
 
-    weather_data = get_weather(location)
+    weather_data = get_weather_data(location)
 
     send_message_to_telex(payload, weather_data)
+
+
+def get_weather_data(location: str):
+    api_key = os.getenv("API_KEY")
+    weather_api_url = f"https://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=yes"
+
+    response = requests.get(weather_api_url)
+
+    return response.json()
 
 
 if __name__ == "__main__":
