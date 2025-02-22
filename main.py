@@ -72,6 +72,14 @@ def get_integration_json(request: Request):
     return integration_json
 
 
+def handle_weather_request(payload: MonitorPayload):
+    location = payload.settings[0].default
+
+    weather_data = get_weather(location)
+
+    send_message_to_telex(payload, weather_data)
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app)
