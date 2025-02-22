@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, BackgroundTasks
 from pydantic import BaseModel
 from typing import List
 import os
@@ -117,6 +117,11 @@ def send_message_to_telex(payload: MonitorPayload, weather_data: dict):
     }
 
     requests.post(payload.return_url, json=data)
+    
+@app.post('/tick', status_code=202)
+def handle_incoming_request(payload: MonitorPayload, background_tasks: BackgroundTasks):
+    background_tasks.add_task(handle_weather_request, payload)
+    return {"status": "accepted"}
 
 if __name__ == "__main__":
     import uvicorn
